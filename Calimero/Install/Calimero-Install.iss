@@ -2,16 +2,16 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Calimero"
-#define MyAppVersion "0.01"
-#define MyAppPublisher "Clausthaler Studios"
-#define MyAppURL "https://github.com/clausthaler-devel/Calimero"
+#define MyAppVersion "0.3"
+#define MyAppPublisher "Claus Thaler Productions Incorporated & sons"
+#define MyAppURL "https://github.com/AJ3D/Ploppable-RICO/wiki/Calimero"
 #define MyAppExeName "Calimero.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{43216E81-BE7C-45B3-AB35-DC22EC23F01D}
+AppId={{2F07C02F-05AA-4F9F-BCE7-7DE676F90926}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -21,9 +21,8 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputDir=D:\Projekte\Cities Skylines\Calimero\Calimero\Install
-OutputBaseFilename=Calimero-Setup-0.01
-SetupIconFile=D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Calimero.ico
+OutputBaseFilename={#MyAppName}-setup-{#MyAppVersion}
+SetupIconFile=D:\Projekte\Cities Skylines\Calimero\Calimero\Resources\calimero_XpQ_icon.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -57,30 +56,19 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Calimero.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Assembly-CSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Assembly-CSharp-firstpass.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Calimero.application"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Calimero.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Calimero.exe.manifest"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Calimero.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\ColossalManaged.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\HtmlAgilityPack.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\ICities.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\ICSharpCode.SharpZipLib.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\PloppableRICO.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\Steam.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Projekte\Cities Skylines\Calimero\Calimero\Install\Calimero_1_0_0_5\UnityEngine.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\bin\Debug\Calimero.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\bin\Debug\CrpParser.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\bin\Debug\HtmlAgilityPack.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\bin\Debug\PloppableRICO.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\bin\Debug\Steam.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: quicklaunchicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: runascurrentuser nowait postinstall skipifsilent
 

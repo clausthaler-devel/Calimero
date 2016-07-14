@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle( "Calimero" )]
 [assembly: AssemblyDescription( "An editor for RICO files." )]
 [assembly: AssemblyConfiguration( "" )]
-[assembly: AssemblyCompany( "" )]
+[assembly: AssemblyCompany( "Claus Thaler Productions Incorporated & Sons" )]
 [assembly: AssemblyProduct( "Calimero" )]
 [assembly: AssemblyCopyright( "Copyright ©  2016" )]
 [assembly: AssemblyTrademark( "" )]
@@ -51,5 +51,5 @@ using System.Windows;
 // Sie können alle Werte angeben oder die standardmäßigen Build- und Revisionsnummern 
 // übernehmen, indem Sie "*" eingeben:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion( "1.0.0.0" )]
+[assembly: AssemblyVersion( "2.0.0.0" )]
 [assembly: AssemblyFileVersion( "1.0.0.0" )]

@@ -27,7 +27,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -75,17 +75,21 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Calimero.ico</ApplicationIcon>
+    <ApplicationIcon>calimero_XpQ_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CrpParser, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\crp-parser\CRPParser\bin\Release\CrpParser.dll</HintPath>
+    </Reference>
     <Reference Include="HtmlAgilityPack">
-      <HintPath>..\..\..\..\Visual Studio 2010\Projects\CitiesSkylinesAssetsManager\Steam\bin\Debug\HtmlAgilityPack.dll</HintPath>
+      <HintPath>C:\Users\holli\Documents\Visual Studio 2010\Projects\CitiesSkylinesAssetsManager\Steam\bin\Debug\HtmlAgilityPack.dll</HintPath>
     </Reference>
     <Reference Include="PloppableRICO">
       <HintPath>D:\Projekte\Cities Skylines\Ploppable-RICO\PloppableRCI\bin\Debug\PloppableRICO.dll</HintPath>
     </Reference>
     <Reference Include="Steam">
-      <HintPath>..\..\..\..\Visual Studio 2010\Projects\CitiesSkylinesAssetsManager\Steam\bin\Debug\Steam.dll</HintPath>
+      <HintPath>C:\Users\holli\Documents\Visual Studio 2010\Projects\CitiesSkylinesAssetsManager\Steam\bin\Debug\Steam.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -110,6 +114,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CrpDataProvider.cs" />
+    <Compile Include="DocumentManager.cs" />
+    <Compile Include="GameDlls.cs" />
+    <Compile Include="RicoDocument.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="SplashScreen.xaml.cs">
+      <DependentUpon>SplashScreen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Steam.cs" />
+    <Compile Include="SteamDataProvider.cs" />
+    <Page Include="DownloadDefinitionDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,11 +137,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CrpFile.cs" />
+    <Compile Include="DownloadDefinitionDialog.xaml.cs">
+      <DependentUpon>DownloadDefinitionDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainWindow.Commands.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="SplashScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -234,7 +259,37 @@
     <Resource Include="Calimero.ico" />
   </ItemGroup>
   <ItemGroup>
-    <SplashScreen Include="SplashScreen1.png" />
+    <Resource Include="Resources\share_down.png" />
+    <Resource Include="Resources\share_up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\first.png" />
+    <Resource Include="Resources\last.png" />
+    <Resource Include="Resources\next.png" />
+    <Resource Include="Resources\previous.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Help.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="IWshRuntimeLibrary">
+      <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\SplashScreen1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="calimero_XpQ_icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
