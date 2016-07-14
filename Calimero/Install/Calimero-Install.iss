@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Calimero"
-#define MyAppVersion "0.3"
+#define MyAppVersion "0.31"
 #define MyAppPublisher "Claus Thaler Productions Incorporated & sons"
 #define MyAppURL "https://github.com/AJ3D/Ploppable-RICO/wiki/Calimero"
 #define MyAppExeName "Calimero.exe"

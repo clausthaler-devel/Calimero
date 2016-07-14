@@ -471,7 +471,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel IsEnabled="False">
+                <StackPanel>
                     <RadioButton GroupName="Service" Content="Residential" Grid.Column="0"
                     IsChecked="{Binding service, Converter={StaticResource StringMatchConverter}, 
                     ConverterParameter='residential'}" 
