@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Calimero"
         mc:Ignorable="d"
         Title="SplashScreen" Height="250" Width="400" Background="Transparent"
-        WindowStyle="None" BorderThickness="0" ResizeMode="NoResize">
+        WindowStyle="None" BorderThickness="0" ResizeMode="NoResize" ShowInTaskbar="False">
     <Grid Background="#1e1e1e">
         <Image Height="250" Width="400" Source="pack://application:,,/Resources/SplashScreen1.png" />
 

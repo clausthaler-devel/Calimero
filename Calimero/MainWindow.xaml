@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         Name="MainWindowX" Title="MainWindow" MinHeight="500" Height="560"  FontFamily="Arial" FontSize="15" Width="1068" MinWidth="975"
         WindowStyle="None" AllowsTransparency="False" ResizeMode="NoResize" IsHitTestVisible="True" Foreground="#9C9C9C"
-        SizeChanged="WindowResize" Icon="Calimero.ico" WindowStartupLocation="CenterScreen">
+        SizeChanged="WindowResize" Icon="pack://application:,,/Resources/calimero_XpQ_icon.ico" WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <ResourceDictionary>
