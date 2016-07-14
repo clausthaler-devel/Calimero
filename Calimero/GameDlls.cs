@@ -41,10 +41,8 @@ namespace Calimero
                 if ( error == "" )
                     MessageBox.Show( error, "Error", MessageBoxButton.OK, MessageBoxImage.Error );
                 else
-                {
-                    MessageBox.Show( "Game-Dlls had to be copied. Calimero must be restarted", "Bab-ba-da-bu-bap", MessageBoxButton.OK, MessageBoxImage.Information );
                     Process.Start( calimeroExe.FullName );
-                }
+
                 Environment.Exit( 0 );
             }
         }
