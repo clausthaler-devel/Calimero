@@ -5,10 +5,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Calimero"
+        xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
+        xmlns:img="clr-namespace:System.Windows.Media.Imaging;assembly=PresentationCore"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="500" Height="560"  FontFamily="Arial" FontSize="15" Width="1068" MinWidth="975"
+        Name="MainWindowX" Title="MainWindow" MinHeight="500" Height="560"  FontFamily="Arial" FontSize="15" Width="1068" MinWidth="975"
         WindowStyle="None" AllowsTransparency="False" ResizeMode="NoResize" IsHitTestVisible="True" Foreground="#9C9C9C"
-        SizeChanged="WindowResize" Icon="Calimero.ico" WindowStartupLocation="CenterScreen" ToolTip="Calimero - The RICO Editor">
+        SizeChanged="WindowResize" Icon="pack://application:,,/Resources/calimero_XpQ_icon.ico" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -18,10 +20,26 @@
                     <local:IntEqualsConverter x:Key="IntEqualsConverter" />
                     <local:IsTrueConverter x:Key="IsTrueConverter" />
                     <local:IsFalseConverter x:Key="IsFalseConverter" />
+                    <local:NotNullOrEmptyConverter x:Key="NotNullOrEmptyConverter" />
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="local:CalimeroCommands.SaveCommand" CanExecute="SaveCommand_CanExecute" Executed="SaveCommand" />
+        <CommandBinding Command="local:CalimeroCommands.SaveAsCommand" CanExecute="SaveAsCommand_CanExecute" Executed="SaveAsCommand" />
+        <CommandBinding Command="local:CalimeroCommands.LoadFromWebCommand" CanExecute="LoadFromWebCommand_CanExecute" Executed="LoadFromWebCommand" />
+        <CommandBinding Command="local:CalimeroCommands.ExitCommand" CanExecute="ExitCommand_CanExecute" Executed="ExitCommand" />
+        <CommandBinding Command="local:CalimeroCommands.ImportCommand" CanExecute="ImportCommand_CanExecute" Executed="ImportCommand" />
+        <CommandBinding Command="local:CalimeroCommands.AddBuildingCommand" CanExecute="AddBuildingCommand_CanExecute" Executed="AddBuildingCommand" />
+        <CommandBinding Command="local:CalimeroCommands.RemoveBuildingCommand" CanExecute="RemoveBuildingCommand_CanExecute" Executed="RemoveBuildingCommand" />
+        <CommandBinding Command="local:CalimeroCommands.SaveToWebCommand" CanExecute="SaveToWebCommand_CanExecute" Executed="SaveToWebCommand" />
+        <CommandBinding Command="local:CalimeroCommands.PreviousPremadeCommand" CanExecute="PreviousPremadeCommand_CanExecute" Executed="PreviousPremadeCommand" />
+        <CommandBinding Command="local:CalimeroCommands.NextPremadeCommand" CanExecute="NextPremadeCommand_CanExecute" Executed="NextPremadeCommand" />
+        <CommandBinding Command="local:CalimeroCommands.OpenCommand" CanExecute="OpenCommand_CanExecute" Executed="OpenCommand" />
+        <CommandBinding Command="local:CalimeroCommands.FindCommand" CanExecute="FindCommand_CanExecute" Executed="FindCommand" />
+        <CommandBinding Command="local:CalimeroCommands.FindNextCommand" CanExecute="FindNextCommand_CanExecute" Executed="FindNextCommand" />
+    </Window.CommandBindings>
     <!-- ImageBrush ImageSource="pack://application:,,/Resources/Background.png"></>
     </Window.Background-->
     <Grid Name="PanelMain" VerticalAlignment="Top">
@@ -43,35 +61,26 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <Grid Grid.ColumnSpan="3" MouseDown="MoveWindow" Height="20">
-            <Grid.Background>
-                <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
-                    <GradientStop Color="#1E242C" Offset="0"/>
-                    <GradientStop Color="#222224" Offset="0.567"/>
-                </LinearGradientBrush>
-            </Grid.Background>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80" />
-                <ColumnDefinition Width="313*" />
-                <ColumnDefinition Width="595*"/>
-                <ColumnDefinition Width="80" />
-            </Grid.ColumnDefinitions>
-            <Label Name="labelCaption"  Grid.Column="1" Foreground="#9c9c9c" FontSize="12" HorizontalContentAlignment="Center" Grid.ColumnSpan="2" >* unnamed</Label>
-            <StackPanel  Margin="0,0,10,0" Grid.Column="3" Name="SystemBox" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" >
-                <Button Click="MinimizeWindow" Height="20" Width="20" BorderThickness="0">
-                    <Image Source="pack://application:,,/Resources/Minimize.png" HorizontalAlignment="Right" Height="20" Width="20"  VerticalAlignment="Top" />
-                </Button>
-                <Button Name="buttonWindowState" Click="MaximizeWindow" Height="20" Width="20" BorderThickness="0">
-                    <Image Name ="imageWindowState" Source="pack://application:,,/Resources/Maximize.png" HorizontalAlignment="Right" VerticalAlignment="Top"/>
-                </Button>
-                <Button Click="CloseWindow" Height="20" Width="20" BorderThickness="0">
-                    <Image Source="pack://application:,,/Resources/Close.png"  Height="20" Width="20" VerticalAlignment="Top"/>
-                </Button>
-            </StackPanel>
-        </Grid>
+        <StackPanel Grid.ColumnSpan="3" Margin ="15,5,15,0" MouseDown="MoveWindow" Height="45">
+            <Grid Margin="0,0,0,0" Grid.ColumnSpan="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ProgressBar Visibility="Hidden" BorderThickness="0" Background="#262626" Name="ProgressBar"></ProgressBar>
+                <Label Name="labelCaption" Foreground="#9c9c9c" FontSize="12" HorizontalContentAlignment="Center" Content="{Binding CurrentDocumentTitle}" />
+                <StackPanel Name="SystemBox" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" >
+                    <Button Click="MinimizeWindow" Height="20" Width="20" BorderThickness="0">
+                        <Image Source="pack://application:,,/Resources/Minimize.png" HorizontalAlignment="Right" Height="20" Width="20"  VerticalAlignment="Top" />
+                    </Button>
+                    <Button Name="buttonWindowState" Click="MaximizeWindow" Height="20" Width="20" BorderThickness="0">
+                        <Image Name ="imageWindowState" Source="pack://application:,,/Resources/Maximize.png" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                    </Button>
+                    <Button Margin="0,0,0,0" Command="local:CalimeroCommands.ExitCommand" Height="20" Width="20" BorderThickness="0">
+                        <Image Source="pack://application:,,/Resources/Close.png"  Height="20" Width="20" VerticalAlignment="Top"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
         <!--#region Top Bar -->
         <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Margin="15,0,0,0">
             <Grid Height="68">
@@ -125,46 +134,80 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="435" />
+                    <ColumnDefinition Width="625" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="61.085" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Orientation="Horizontal" >
-                    <Button Click="AddBuilding_Click" Grid.Column="0"  MouseMove="MenuHover" MouseLeave="MenuHoverEnd" >
+                    <Button MouseMove="HelpHover" MouseLeave="HelpHoverEnd"  >
+                        <Image Source="pack://application:,,/Resources/Help.png" />
+                    </Button>
+                    <Button Command="local:CalimeroCommands.AddBuildingCommand" Grid.Column="0"  MouseMove="MenuHover" MouseLeave="MenuHoverEnd" >
                         <Image Source="pack://application:,,/Resources/Add.png" />
-                        <Button.ToolTip>Add a building definition to the RICO-file.</Button.ToolTip>
+                        <Button.ToolTip>Add a building definition to the RICO-file</Button.ToolTip>
                     </Button>
-                    <Button Click="RemoveBuilding_Click" Grid.Column="1" Margin="13,0,0,0" MouseMove="MenuHover" MouseLeave="MenuHoverEnd">
+                    <Button Command="local:CalimeroCommands.RemoveBuildingCommand" Grid.Column="1" Margin="13,0,0,0" MouseMove="MenuHover" MouseLeave="MenuHoverEnd">
                         <Image Source="pack://application:,,/Resources/Remove.png" />
-                        <Button.ToolTip>Remove the selected building from the RICO-file.</Button.ToolTip>
+                        <Button.ToolTip>Remove the selected building from the RICO-file</Button.ToolTip>
                     </Button>
-                    <Button Grid.Column="2" MouseMove="SteamHover" MouseLeave="SteamHoverEnd"  Margin="13,0,0,0" >
-                        <Image Source="pack://application:,,/Resources/Steam.png" />
-                        <Button.ToolTip>Steam preview (if available)</Button.ToolTip>
-                    </Button>
-                    <Button Click="OpenCommand" Margin="20,0,0,0">
+
+                    <Button Command="local:CalimeroCommands.OpenCommand" Margin="20,0,0,0">
                         <Image Source="pack://application:,,/Resources/Load.png" />
-                        <Button.ToolTip>Load a RICO file.</Button.ToolTip>
+                        <Button.ToolTip>Load a RICO file. (Ctrl-O)</Button.ToolTip>
                     </Button>
-                    <Button Click="ImportCommand" Margin="20,0,0,0">
+                    <StackPanel Margin="0,10,0,0">
+
+                        <Button Command="local:CalimeroCommands.PreviousPremadeCommand" Margin="0,0,0,0" Height="24" Width="24">
+                            <Image Source="pack://application:,,/Resources/previous.png" />
+                            <Button.ToolTip>Load previous RICO definition (Ctrl-ArrowLeft)</Button.ToolTip>
+                        </Button>
+
+                        <Button Command="local:CalimeroCommands.NextPremadeCommand" Margin="0,0,0,0" Height="24" Width="24">
+                            <Image Source="pack://application:,,/Resources/next.png" />
+                            <Button.ToolTip>Load next RICO definition (Ctrl-ArrowRight)</Button.ToolTip>
+                        </Button>
+                    </StackPanel>
+
+                    <Button Command="local:CalimeroCommands.LoadFromWebCommand" Margin="13,0,0,0">
+                        <Image Source="pack://application:,,/Resources/share_down.png" />
+                        <Button.ToolTip>Search for RICO definitions online (Ctrl-D)</Button.ToolTip>
+                    </Button>
+                    <Button Command="local:CalimeroCommands.ImportCommand" Margin="13,0,0,0">
                         <Image Source="pack://application:,,/Resources/Import.png" />
-                        <Button.ToolTip>Load a RICO file.</Button.ToolTip>
+                        <Button.ToolTip>Import a RICO file (Ctrl-I)</Button.ToolTip>
                     </Button>
-                    <Button Click="SaveCommand" Margin="13,0,0,0" >
+                    <Button Command="local:CalimeroCommands.SaveCommand" Margin="13,0,0,0" >
                         <Image Source="pack://application:,,/Resources/Save.png" />
-                        <Button.ToolTip>Save RICO data.</Button.ToolTip>
+                        <Button.ToolTip>Save RICO data (Ctrl-S)</Button.ToolTip>
                     </Button>
-                    <Button Click="SaveAsCommand" Margin="13,0,0,0">
+                    <Button Command="local:CalimeroCommands.SaveAsCommand" Margin="13,0,0,0">
                         <Image Source="pack://application:,,/Resources/SaveAs.png" />
-                        <Button.ToolTip>Save RICO data under a new name.</Button.ToolTip>
+                        <Button.ToolTip>Save RICO data under a new name (Ctrl-Alt-S)</Button.ToolTip>
+                    </Button>
+
+                    <Button Command="local:CalimeroCommands.SaveToWebCommand" Margin="13,0,0,0">
+                        <Image Source="pack://application:,,/Resources/share_up.png" />
+                        <Button.ToolTip>Share your RICO definition with others (Ctrl-U)</Button.ToolTip>
+                    </Button>
+                    <Button Command="local:CalimeroCommands.FindCommand" Margin="13,0,0,0">
+                        <Image Source="pack://application:,,/Resources/search.png" />
+                        <Button.ToolTip>Search for assets (Ctrl-F, F3 to continue search)</Button.ToolTip>
                     </Button>
                 </StackPanel>
 
-                <StackPanel Name="panelWarning" Orientation="Horizontal" Grid.Column="1" >
-                    <Image Margin="20,0,0,0" Source="pack://application:,,/Resources/Warning.png" Height="16" Width="16"></Image>
-                    <Label x:Name="lblInfo" HorizontalContentAlignment="Left" Foreground="#FFE97F" FontSize="16" FontWeight="DemiBold" VerticalContentAlignment="Center">
-                    </Label>
-                </StackPanel>
+                <Grid Grid.Column="1" Margin="-0,0,15,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Visibility="Hidden" Name="panelWarning" Background="#222222" Orientation="Horizontal"  >
+                        <Image Margin="20,0,10,0" Source="pack://application:,,/Resources/Warning.png" Height="16" Width="16"></Image>
+                        <Label x:Name="lblInfo" HorizontalContentAlignment="Left" Foreground="#FFE97F" FontSize="16" FontWeight="DemiBold" VerticalContentAlignment="Center">
+                        </Label>
+                    </StackPanel>
+
+                    <Grid Visibility="Hidden" Grid.Column="0" Name="panelSearch" Background="#222222" >
+                        <TextBox Margin="0,15" Foreground="#1b1b1b" FontSize="22" KeyUp="SearchEnter" Name="SearchBox" VerticalContentAlignment="center"></TextBox>
+                    </Grid>
+                </Grid>
             </Grid>
         </StackPanel>
         <!--#endregion-->
@@ -209,30 +252,95 @@
                     <Setter Property="VerticalContentAlignment" Value="Center" />
                 </Style>
             </Grid.Resources>
-            <Grid Name="PanelPreview" Visibility="Hidden" Background="Transparent" Grid.Row="0" DataContext=""  MouseMove="SteamHover" MouseLeave="SteamHoverEnd">
+            <Grid DataContext="{Binding CurrentBuilding}" Name="PanelPreview" Visibility="Visible" Background="Transparent" Grid.Row="0" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="111" />
-                    <RowDefinition Height="120" />
+                    <RowDefinition Height="220" />
                 </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0" Margin="5,5,5,0">
-                    <Image Name="ImagePreview" Width="190" Source="pack://application:,,/Resources/Loading.png" />
+                <Grid Grid.Row="0" Margin="0,5,5,0">
+                    <Image Name="ImagePreview" Width="175" Source="{Binding previewImage}" />
                 </Grid>
                 <StackPanel Grid.Row="1" Margin="5,0,5,0" VerticalAlignment="Center" >
-                    <TextBlock TextAlignment="Center" Margin="0,15,0,0" Height="99" VerticalAlignment="Center" HorizontalAlignment="Center" Text="" Grid.Row="3" Name="textboxDescription" TextWrapping="Wrap" />
-                </StackPanel>
+                    <TextBlock TextAlignment="Center" Text="by n/a" Name="SteamAuthor" />
 
+                    <Label  Foreground="#9c9c9c" FontWeight="SemiBold">Steam-Tags:</Label>
+                    <TextBlock Text="{Binding tags}" Name="SteamTags" TextWrapping="Wrap" />
+                    <Label Foreground="#9c9c9c" FontWeight="SemiBold">Asset-Type:</Label>
+                    <TextBlock Text="{Binding type}" Name="Type" TextWrapping="Wrap"></TextBlock>
+                    <TextBlock TextAlignment="Center" Margin="0,5,0,0"  VerticalAlignment="Center" HorizontalAlignment="Center" Text="" Grid.Row="3" Name="textboxDescription" TextWrapping="Wrap" />
+                    <TextBlock Cursor="Hand" MouseUp="SteamLinkClick"  TextDecorations="Underline" Foreground="#C0D1EC" Margin="0,0,0,0" TextAlignment="Center"  Name="SteamLink" Text="(on Steam)">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding steamId, Converter={StaticResource NotNullOrEmptyConverter}}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding steamId, Converter={StaticResource NotNullOrEmptyConverter}}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Cursor="Hand" MouseUp="DiskLinkClick" TextDecorations="Underline" Foreground="#C0D1EC" Margin="0,10,0,0" TextAlignment="Center" Name="DiskLink" Text="(on Disk)">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding parentSourceFile, diag:PresentationTraceSources.TraceLevel=High, Converter={StaticResource NotNullOrEmptyConverter}}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding parentSourceFile, Converter={StaticResource NotNullOrEmptyConverter}}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+
+                    </TextBlock>
+                </StackPanel>
             </Grid>
             <Grid Name="PanelBuildings" Grid.Column="0" Visibility="Hidden" 
                   MouseLeave="MenuHoverEnd" MouseMove="MenuHover" Grid.Row="1" Margin="0,0,0,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
                     <RowDefinition Height="45" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <ListBox ToolTip="Shows a list of the buildings in this RICO-File. This is usually just one." Grid.Row="0" Name="listboxBuildings" SelectionChanged="ShowBuilding">
-                </ListBox>
+                <TextBlock Foreground="#9c9c9c" FontSize="26" TextDecorations="Underline" FontStyle="Italic" FontWeight="DemiBold" TextAlignment="Center" VerticalAlignment="Center">Buildings</TextBlock>
+                <ListView SelectionMode="Extended" Margin="0,10,0,7" ToolTip="Shows a list of the buildings in this RICO-File. This is usually just one." Grid.Row="1" Name="listboxBuildings" SelectionChanged="ShowBuilding">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <WrapPanel>
+                                <Image Width="16">
+                                    <Image.Style>
+                                        <Style TargetType="{x:Type Image}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding isValid}" Value="False">
+                                                    <Setter Property="Source" Value="pack://application:,,/Resources/Warning.png"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+                                <TextBlock Text="{Binding name}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding isDirty}" Value="True">
+                                                    <Setter Property="FontStyle" Value="Italic"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding isDirty}" Value="False">
+                                                    <Setter Property="FontStyle" Value="Normal"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </WrapPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
             </Grid>
-            <Grid Name="PanelLabels" Grid.Column="0" Grid.Row="1" Margin="0,0,0,0">
+            <Grid Name="PanelHelp" Grid.Column="0" Grid.Row="1" Margin="0,0,0,0" Visibility="Hidden" MouseMove="HelpHover" MouseLeave="HelpHoverEnd">
                 <StackPanel>
                     <Button>
                         <Button.Content>Name</Button.Content>
@@ -243,8 +351,6 @@
                         <Button.ToolTip>
                             <TextBlock>
                                 Wether or not to override the <Italic>Realistic Population and Consumption Mod</Italic>, if it is running. 
-                                <LineBreak />
-                                RICO will enforce the file settings when this is set to <Italic>Ignore</Italic>.
                             </TextBlock>
                         </Button.ToolTip>
                     </Button>
@@ -290,8 +396,9 @@
         </Grid>
         <!--#endregion-->
         <!--#region Settings -->
-        <StackPanel Grid.Column="1" Grid.Row="3" Margin="0,10, 10, 10" Background="Transparent" Grid.ColumnSpan="2">
+        <StackPanel Name="PanelData" DataContext="{Binding CurrentBuilding}" Grid.Column="1" Grid.Row="2" Margin="0,10, 10, 10" Background="Transparent" Grid.ColumnSpan="2">
             <StackPanel.Resources>
+
                 <Style TargetType="TextBox">
                     <Setter Property="Margin" Value="5,5,5,5"/>
                     <Setter Property="BorderThickness" Value="0" />
@@ -331,7 +438,7 @@
                 </Style>
             </StackPanel.Resources>
             <Grid>
-                <TextBox Text="{Binding name, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Text="{Binding Path=name, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
 
             <Grid>
@@ -343,11 +450,11 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <RadioButton GroupName="Reality" Content="Ignore Reality mod" 
+                    <RadioButton GroupName="Reality" Content="Use RICO jobs/homes settings"
                         IsChecked="{Binding RealityIgnored, Converter={StaticResource IsTrueConverter}}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1">
-                    <RadioButton GroupName="Reality" Content="Embrace Reality!"
+                    <RadioButton GroupName="Reality" Content="Use Realistic Mod settings"
                         IsChecked="{Binding RealityIgnored, Converter={StaticResource IsFalseConverter}}" />
                 </StackPanel>
             </Grid>
@@ -363,7 +470,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel>
+                <StackPanel IsEnabled="False">
                     <RadioButton GroupName="Service" Content="Residential" Grid.Column="0"
                     IsChecked="{Binding service, Converter={StaticResource StringMatchConverter}, 
                     ConverterParameter='residential'}" 
@@ -434,7 +541,7 @@
                     Checked="SubserviceNonGeneric_Checked"/>
                 </StackPanel>
                 <StackPanel Grid.Column="4" Name="buttonGeneric">
-                    <RadioButton GroupName="SubService" Content="Generic"
+                    <RadioButton GroupName="SubService" Content="Generic" 
                     IsChecked="{Binding subService, ConverterParameter='generic', 
                     Converter={StaticResource StringMatchConverter}}"         
                     Checked="SubserviceGeneric_Checked"/>
@@ -448,7 +555,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
+                <StackPanel Grid.Column="0" >
                     <RadioButton GroupName="SubService" Content="High" Grid.Column="0"
                     IsChecked="{Binding subService, 
                     Converter={StaticResource StringMatchConverter}, ConverterParameter='high'}" />
@@ -489,12 +596,12 @@
                     Converter={StaticResource IntEqualsConverter}, ConverterParameter='2'}"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Name="buttonLevel3" >
-                    <RadioButton GroupName="Level" Content="3" 
+                    <RadioButton GroupName="Level" Content="3"
                     IsChecked="{Binding level, 
                     Converter={StaticResource IntEqualsConverter}, ConverterParameter='3'}" />
                 </StackPanel>
                 <StackPanel Grid.Column="3" Name="buttonLevel4">
-                    <RadioButton GroupName="Level" Content="4" 
+                    <RadioButton GroupName="Level" Content="4"
                     IsChecked="{Binding level, 
                     Converter={StaticResource IntEqualsConverter}, ConverterParameter='4'}" />
                 </StackPanel>
@@ -507,7 +614,7 @@
                 </StackPanel>
             </Grid>
             <Grid Name="PanelHomes">
-                <TextBox Name="TextboxHomeCount" Tag="Households ({0})"
+                <TextBox Name="TextboxHomeCount" Tag="Households ({0})" 
                     GotFocus="GotIntValueFocus" LostFocus="LostIntValueFocus" KeyDown="OnlyIntInput"
                     Text="{Binding homeCount, 
                     Converter={StaticResource FormatIntConverter}, ConverterParameter='Households ({0})'}"
@@ -570,7 +677,7 @@
                     IsEnabled="{Binding service, 
                     Converter={StaticResource StringMatchConverter}, 
                     ConverterParameter='commercial|office|industrial|extractor'}" />
-                <TextBox Name="TextboxDeviationEducated" Grid.Column="1" Tag="educated ({0})"
+                <TextBox Name="TextboxDeviationEducated" Grid.Column="1" Tag="educated ({0})" 
                     GotFocus="GotIntValueFocus" LostFocus="LostIntValueFocus" KeyDown="OnlyIntInput"
                     Text="{Binding workplaceDeviation[1], 
                     Converter={StaticResource FormatIntConverter}, ConverterParameter='educated ({0})'}" 
@@ -596,15 +703,12 @@
                     <ColumnDefinition Width="*" />
                     <!-- ColumnDefinition Width="*" /-->
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Tag="construction Cost ({0})" GotFocus="GotIntValueFocus" LostFocus="LostIntValueFocus" KeyDown="OnlyIntInput"
+                <TextBox Grid.Column="0" Tag="construction Cost ({0})"  GotFocus="GotIntValueFocus" LostFocus="LostIntValueFocus" KeyDown="OnlyIntInput"
                     Text="{Binding constructionCost, Converter={StaticResource FormatIntConverter}, ConverterParameter='construction Cost ({0})'}" />
                 <!-- TextBox Grid.Column="1" Tag="fire hazard ({0})" GotFocus="GotIntValueFocus" LostFocus="LostIntValueFocus" KeyDown="OnlyIntInput"
                     Text="{Binding fireHazard, Converter={StaticResource FormatIntConverter}, ConverterParameter='fire hazard ({0})'}" /-->
             </Grid>
         </StackPanel>
         <!--#endregion-->
-
-
-
     </Grid>
 </Window>

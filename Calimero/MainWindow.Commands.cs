@@ -1,58 +1,175 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
+using System;
+using System.IO;
+using System.Net;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.IO;
-using Microsoft.Win32;
-using System.Net;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
+using System.Windows.Controls;
 using System.Windows.Documents;
-//using LoadingIndicators.WPF;
+using System.Windows.Media.Imaging;
+using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Text.RegularExpressions;
+
 using PloppableRICO;
-
-using System.Windows.Media;
-
+using CRPTools;
 
 namespace Calimero
 {
+
+    public static class CalimeroCommands
+    {
+        public static readonly RoutedUICommand ExitCommand = new RoutedUICommand
+        (
+            "ExitCommand",
+            "ExitCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.F4, ModifierKeys.Alt)
+            }
+        );
+
+        public static readonly RoutedUICommand OpenCommand = new RoutedUICommand
+        (
+            "OpenCommand",
+            "OpenCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.O, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand ImportCommand = new RoutedUICommand
+        (
+            "OpenCommand",
+            "OpenCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.I, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand AddBuildingCommand = new RoutedUICommand
+        (
+            "AddBuildingCommand",
+            "AddBuildingCommand",
+            typeof(CalimeroCommands)
+        );
+
+        public static readonly RoutedUICommand RemoveBuildingCommand = new RoutedUICommand
+        (
+            "RemoveBuildingCommand",
+            "RemoveBuildingCommand",
+            typeof(CalimeroCommands)
+        );
+
+        public static readonly RoutedUICommand SaveCommand = new RoutedUICommand
+        (
+            "SaveCommand",
+            "SaveCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.S, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand SaveAsCommand = new RoutedUICommand
+        (
+            "SaveAsCommand",
+            "SaveAsCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.S, ModifierKeys.Alt ^ ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand SaveToWebCommand = new RoutedUICommand
+        (
+            "SaveToWebCommand",
+            "SaveToWebCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.U, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand LoadFromWebCommand = new RoutedUICommand
+        (
+            "LoadFromWebCommand",
+            "LoadFromWebCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.D, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand PreviousPremadeCommand = new RoutedUICommand
+        (
+            "PreviousPremadeCommand",
+            "PreviousPremadeCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.Left, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand NextPremadeCommand = new RoutedUICommand
+        (
+            "NextPremadeCommand",
+            "NextPremadeCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.Right, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand FindCommand = new RoutedUICommand
+        (
+            "FindCommand",
+            "FindCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.F, ModifierKeys.Control)
+            }
+        );
+
+        public static readonly RoutedUICommand FindNextCommand = new RoutedUICommand
+        (
+            "FindNextCommand",
+            "FindNextCommand",
+            typeof(CalimeroCommands),
+            new InputGestureCollection()
+            {
+                new KeyGesture(Key.F3)
+            }
+        );
+
+    }
+
     public partial class MainWindow : Window
     {
-        private FileInfo ricoFile;
-
-        private PloppableRICODefinition ricoDef;
-        private PloppableRICODefinition.Building buildingDef;
-        private Thread WatchdogThread;
         private Thread CloseSideBarThread;
         private Thread ClosePreviewThread;
-        private List<String> buildingProblems;
         string lastIntValue;
-        private BitmapImage previewImage;
-        private bool downloadActive;
-        private System.Text.RegularExpressions.Regex reDigit = new System.Text.RegularExpressions.Regex( @"[^\d]" );
-        private void StartWatchdogThread()
-        {
-            WatchdogThread = new Thread( () => Bark() );
-            WatchdogThread.IsBackground = true;
-            WatchdogThread.Start();
-        }
+     
 
-        private void Bark()
-        {
-            while ( true )
-            {
-                if ( buildingDef != null )
-                    ToggleWarnings( CheckBuildingForProblems() );
-                Thread.Sleep( 1500 );
-            }
-        }
+        //private bool downloadActive = false;
+        private System.Text.RegularExpressions.Regex reDigit = new System.Text.RegularExpressions.Regex( @"[^\d]" );
+
 
         public void ToggleWarnings( bool toggle )
         {
@@ -67,12 +184,14 @@ namespace Calimero
         private String ProblemsOverview()
         {
             var problem = "";
-            problem = new Regex( @"^.+\(" ).Replace( buildingProblems[0], "" );
-            problem = new Regex( @"\).*$" ).Replace( problem, "" );
-
-            if ( buildingProblems.Count() > 1 )
-                problem += String.Format( " (+ {0} more.)", buildingProblems.Count() );
-
+            if ( RicoManager.CurrentBuilding.errors.Count > 0 )
+            {
+                problem = new Regex( @"^.+\(" ).Replace( RicoManager.CurrentBuilding.errors[0], "" );
+                problem = new Regex( @"\).*$" ).Replace( problem, "" );
+                problem = new Regex( @"\. " ).Replace( problem, ".\r\n", 1 );
+                if ( RicoManager.CurrentBuilding.errors.Count() > 1 )
+                    problem += String.Format( " (+ {0} more.)", RicoManager.CurrentBuilding.errors.Count() );
+            }
             return problem;
         }
 
@@ -84,34 +203,17 @@ namespace Calimero
         private void ImportRicoData()
         {
             var dlg = new OpenFileDialog();
-
             dlg.FileName = "";
             dlg.Filter = "rico files (*.rico;PloppableRICODefinition.xml)|*.rico;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
-
+            dlg.Multiselect = true;
             if ( dlg.ShowDialog() == true )
-            {
-                List<string> errors = new List<string>();
-                var importRicoDef = RICOReader.ParseRICODefinition( "", dlg.FileName, errors );
+                foreach ( var fileName in dlg.FileNames )
+                    RicoManager.ImportDocument( new FileInfo( fileName ) );
 
-                if ( errors.Count > 0 )
-                {
-                    MessageBox.Show(
-                        String.Format(
-                            "Errors while importing: {0}\r\n( Plus {1} more )",
-                            errors[0], errors.Count - 1
-                        ),
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error );
-                }
-                else
-                {
-                    foreach ( var building in importRicoDef.Buildings )
-                        ricoDef.Buildings.Add( building );
-                    UpdateBuildingList();
-                }
-            }
+            RefreshBindings();
         }
 
-        private void LoadRicoData()
+        private void LoadRicoData(bool noProps = false)
         {
             var errors = new List<String>();
             var dlg = new OpenFileDialog();
@@ -120,145 +222,85 @@ namespace Calimero
             dlg.Filter = "rico files (*.rico;PloppableRICODefinition.xml)|*.rico;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
 
             if ( dlg.ShowDialog() == true )
-                ricoFile = new FileInfo( dlg.FileName );
+                RicoManager.LoadDocument( dlg.FileName );
             else
-                ricoFile = null;
+                return;
 
-            if ( ricoFile != null )
-                LoadRicoData( ricoFile );
-
-            this.DataContext = buildingDef;
+            RefreshBindings();
         }
 
-        private void LoadRicoData( FileInfo file )
+        private void Find()
         {
-            LoadRicoData( file.FullName );
-        }
-
-        private void LoadRicoData( string file )
-        {
-
-            var errors = new List<String>();
-
-            if ( !new FileInfo( file ).Exists ) return;
-
-            if ( file.ToLower().EndsWith( ".crp" ) )
+            if ( panelSearch.Visibility == Visibility.Visible )
             {
-                var crp = new CrpFile();
-                var buildingName = "";
-                var buildingPackageId = "";
-
-                if ( crp.parse( file ) )
-                {
-                    buildingName = crp.mainAsset;
-                    buildingPackageId = crp.packageName;
-                }
-
-                ricoDef = new PloppableRICODefinition();
-                buildingDef = new PloppableRICODefinition.Building();
-                buildingDef.name = buildingName;
-                buildingDef.steamId = buildingPackageId;
-                ricoDef.Buildings.Add( buildingDef );
-
-                ricoFile = new FileInfo( System.IO.Path.Combine( new FileInfo( file ).Directory.FullName, "PloppableRICODefinition.xml" ) );
-                UpdateCaption( ricoFile );
-                UpdateBuildingList();
-                previewImage = null;
+                panelSearch.Visibility = Visibility.Hidden;
             }
             else
             {
-
-                ricoDef = RICOReader.ParseRICODefinition( "", file, errors );
-
-                if ( errors.Count > 0 )
-                {
-                    MessageBox.Show(
-                        String.Format(
-                            "Errors while loading: {0}\r\n( Plus {1} more )",
-                            errors[0], errors.Count - 1
-                        ),
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error );
-
-                    UpdateCaption( ricoFile );
-                }
-                else
-                {
-                    ricoFile = new FileInfo( file );
-                    buildingDef = ricoDef.Buildings[0];
-                    UpdateCaption( ricoFile );
-                    previewImage = null;
-                }
-
-                // see if we can deduce a steam id from the files path
-                if ( buildingDef.steamId == "" )
-                {
-                    var d = ricoFile.FullName.Split( System.IO.Path.DirectorySeparatorChar );
-                    var p = d[ d.Count() - 2 ];
-                    if ( new Regex( @"^\d+$" ).IsMatch( p ) )
-                        buildingDef.steamId = p;
-                }
-
-                
-                foreach ( var building in ricoDef.Buildings )
-                {
-                    if ( building.service != "residential" )
-                    {
-                        var wc = building.workplaces.Count();
-                        if ( building.workplaces[wc - 1] < 0 )
-                        {
-                            var service = Util.ucFirst( buildingDef.service );
-                            var subservice = Util.ucFirst( buildingDef.subService );
-                            var level = "Level" + buildingDef.level.ToString();
-
-                            if ( service == "Industrial" || service == "Commercial" )
-                                subservice = service + subservice;
-                            else if ( service == "Extractor" )
-                                subservice = "Industrial" + subservice;
-                            else if ( service == "Office" )
-                                subservice = "None";
-
-                            buildingDef.workplaces = WorkplaceAIHelper.distributeWorkplaceLevels(
-                                wc,
-                                Util.WorkplaceDistributionOf( service, subservice, level ),
-                                new int[] { 0, 0, 0, 0 }
-                            );
-                        }
-                    }
-                }
+                panelSearch.Visibility = Visibility.Visible;
+                SearchBox.Focus();
+                SearchBox.SelectionStart = 0;
+                SearchBox.SelectionLength = SearchBox.Text.Length;
             }
-
+            //if ( dlg.ShowDialog() == true )
+            //    RicoManager.FindDocument( dlg.searchTerm );
         }
+
 
         private void SaveRicoData( bool forceAsking = false )
         {
-            if ( ricoFile == null || forceAsking )
+            FileInfo ricoFile = null;
+
+            if ( RicoManager.CurrentDocument.sourceFile == null || forceAsking )
             {
                 var dlg = new SaveFileDialog();
-                dlg.FileName = "PloppableRICODefinition.xml";
-                dlg.Filter = "rico files (*.rico;PloppableRICODefinition.xml)|*.rico;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
+                dlg.FileName = "RICODefinition.xml";
+                dlg.Filter = "rico files (*.rico;RICODefinition.xml)|*.rico;RICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
                 if ( dlg.ShowDialog() == true )
                     ricoFile = new FileInfo( dlg.FileName );
                 else
                     return;
             }
-            if ( ricoFile.Exists )
-                ricoFile.Delete();
 
-            RicoWriter.saveRicoData( ricoFile.FullName, ricoDef );
-            UpdateCaption( ricoFile );
+            foreach ( var building in RicoManager.CurrentDocument.Buildings )
+                if ( building.dbKey != 0 )
+                {
+                    postUse( building );
+                    building.dbKey = 0;
+                }
+
+            if ( !RicoWriter.saveRicoData( ricoFile != null ? ricoFile.FullName : RicoManager.CurrentDocument.sourceFile.FullName, RicoManager.CurrentDocument ) )
+                MessageBox.Show( "Cannot save rico file.", "Oops", MessageBoxButton.OK );
         }
 
-        void UpdateCaption( FileInfo file )
+        void postUse( RICOBuilding building )
         {
-            if ( file == null )
-            {
-                labelCaption.Content = Title = String.Format( "Calimero - ( {0} )", "no file" );
-                return;
-            }
+            var client = new WebClient();
+            var url = String.Format("{0}", Settings.remote_host );
+            var args = new NameValueCollection() {{ "db-key", building.dbKey.ToString() }};
 
-            var d = file.FullName.Split( System.IO.Path.DirectorySeparatorChar );
-            labelCaption.Content = Title = String.Format( "Calimero - ({0})", Path.Combine( "...", d[d.Count() - 2].ToString(), d[d.Count() - 1].ToString() ) );
-        }
+            try
+            {
+                byte[] response = client.UploadValues( url, "PUT", args );
+                string result = System.Text.Encoding.UTF8.GetString(response);
+            }
+            catch // ( Exception e )
+            {
+                // MessageBox.Show( "Upload failed.\r\n" + e.Message, "Calimero - Error", MessageBoxButton.OK, MessageBoxImage.Error );
+            }
+        } 
+
+        //void UpdateCaption( FileInfo file )
+        //{
+        //    if ( file == null )
+        //    {
+        //        labelCaption.Content = Title = String.Format( "Calimero - ( {0} )", "no file" );
+        //        return;
+        //    }
+
+        //    var d = file.FullName.Split( System.IO.Path.DirectorySeparatorChar );
+        //    labelCaption.Content = Title = String.Format( "Calimero - ({0})", Path.Combine( "...", d[d.Count() - 2].ToString(), d[d.Count() - 1].ToString() ) );
+        //}
 
         private void LevelsVisibility1()
         {
@@ -301,25 +343,9 @@ namespace Calimero
             //PanelDeviation.Visibility = residential ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private bool CheckBuildingForProblems()
-        {
-            return CheckBuildingForProblems( buildingDef );
-        }
-
-        private bool CheckBuildingForProblems( PloppableRICODefinition.Building building, bool noReset = false )
-        {
-            var insane = false;
-
-            if ( !noReset )
-                buildingProblems = new List<string>();
-
-            insane = !RICOReader.SanitizeRICOBuilding( "ricod", 0, building, buildingProblems );
-
-            return insane;
-        }
-
         private void CloseSideBarDelayed() { CloseSideBarDelayed( 2000 ); }
-        private void ClosePreviewDelayed() { ClosePreviewDelayed( 2000 ); }
+
+        private void CloseHelpDelayed() { ClosePreviewDelayed( 2000 ); }
 
         private void StopSideBarCloserThread()
         {
@@ -327,7 +353,7 @@ namespace Calimero
                 CloseSideBarThread.Abort();
         }
 
-        private void StopPreviewCloserThread()
+        private void StopHelpCloserThread()
         {
             if ( ClosePreviewThread != null && ClosePreviewThread.IsAlive )
                 ClosePreviewThread.Abort();
@@ -342,44 +368,39 @@ namespace Calimero
 
         private void ClosePreviewDelayed( int delay )
         {
-            StopPreviewCloserThread();
-            ClosePreviewThread = new Thread( () => { Thread.Sleep( delay ); ClosePreview(); } );
+            StopHelpCloserThread();
+            ClosePreviewThread = new Thread( () => { Thread.Sleep( delay ); CloseHelp(); } );
             ClosePreviewThread.Start();
         }
 
         private void CloseSideBar()
         {
             PanelBuildings.Dispatcher.Invoke( () => PanelBuildings.Visibility = Visibility.Hidden );
-            PanelLabels.Dispatcher.Invoke( () => PanelLabels.Visibility = Visibility.Visible );
+            PanelHelp.Dispatcher.Invoke( () => PanelHelp.Visibility = Visibility.Hidden );
+            PanelPreview.Dispatcher.Invoke( () => PanelPreview.Visibility = Visibility.Visible );
         }
 
-        private void ClosePreview()
+        private void CloseHelp()
         {
-            PanelPreview.Dispatcher.Invoke( () => PanelPreview.Visibility = Visibility.Hidden );
-            PanelLabels.Dispatcher.Invoke( () => PanelLabels.Visibility = Visibility.Visible );
+            PanelPreview.Dispatcher.Invoke( () => PanelPreview.Visibility = Visibility.Visible );
+            PanelHelp.Dispatcher.Invoke( () => PanelHelp.Visibility = Visibility.Hidden );
+            PanelBuildings.Dispatcher.Invoke( () => PanelBuildings.Visibility = Visibility.Hidden );
         }
 
         private void OpenSideBar()
         {
-            StopPreviewCloserThread();
+            StopHelpCloserThread();
             StopSideBarCloserThread();
             PanelBuildings.Visibility = Visibility.Visible;
-            PanelPreview.Visibility = PanelLabels.Visibility = Visibility.Hidden;
+            PanelHelp.Visibility = PanelPreview.Visibility = Visibility.Hidden;
         }
 
-        private void OpenPreview()
+        private void OpenHelp()
         {
-            StopPreviewCloserThread();
+            StopHelpCloserThread();
             StopSideBarCloserThread();
-            PanelPreview.Visibility = Visibility.Visible;
-            PanelBuildings.Visibility = PanelLabels.Visibility = Visibility.Hidden;
-        }
-
-        private void UpdateBuildingList()
-        {
-            listboxBuildings.Items.Clear();
-            foreach ( var b in ricoDef.Buildings )
-                listboxBuildings.Items.Add( b.name == "" ? "*unnamed" : b.name );
+            PanelHelp.Visibility = Visibility.Visible;
+            PanelBuildings.Visibility = PanelPreview.Visibility = Visibility.Hidden;
         }
 
         private void OnlyIntInput( object sender, KeyEventArgs e )
@@ -412,83 +433,6 @@ namespace Calimero
             }
         }
 
-        private void DownloadPreviewThread()
-        {
-            downloadActive = true;
-            ImagePreview.Dispatcher.Invoke( () => { ImagePreview.Source = LoadImage( @"pack://application:,,/Resources/Loading.png" ); } );
-            Thread.Sleep( 1000 );
-            DownloadPreview( buildingDef.steamId );
-        }
-
-        private void DownloadPreview( string id )
-        {
-            if ( previewImage != null )
-                return;
-
-            if ( id != null && id != "" )
-            {
-                Steam.Workshop.FileInfo i;
-
-                try
-                {
-                    i = new Steam.Workshop.ItemParser().ItemOf( id );
-                    i.FileID = id;
-                }
-                catch
-                {
-                    downloadActive = false;
-                    return;
-                }
-
-                var wc = new WebClient();
-                wc.DownloadDataCompleted += ( object s, DownloadDataCompletedEventArgs ea ) => {
-                    downloadActive = false;
-                    previewImage = LoadImage( ea.Result );
-                    ImagePreview.Dispatcher.Invoke( () => { ImagePreview.Source = previewImage; } );
-
-                    // God, is that ugly
-                    textboxDescription.Dispatcher.Invoke( () => {
-                        var tb = new TextBlock();
-                        var b = new Bold();
-                        var it = new Italic();
-                        textboxDescription.Inlines.Clear();
-                        b.Inlines.Add( new Run( i.Title ) );
-                        textboxDescription.Inlines.Add( b );
-                        textboxDescription.Inlines.Add( new Run( "\r\nby\r\n " ) );
-                        it.Inlines.Add( new Run( i.Author ) );
-                        textboxDescription.Inlines.Add( it );
-                        textboxDescription.Inlines.Add( new Run( " " ) );
-                        var h = new Hyperlink() { NavigateUri = new Uri("https://steamcommunity.com/sharedfiles/filedetails/?id=" + i.FileID) };
-                        h.Inlines.Add( "\r\n(on Steam)" );
-                        h.RequestNavigate += ( object o, System.Windows.Navigation.RequestNavigateEventArgs e ) => {
-                            System.Diagnostics.Process.Start( e.Uri.ToString() );
-                        };
-                        textboxDescription.Inlines.Add( h );
-                    } );
-                    
-                    
-                };
-                wc.DownloadDataAsync( new Uri( i.PreviewImageSrc + "?output-format=png&fit=inside|190:120" ) ); //, @"d:\b.png" );
-            }
-            else
-            {
-                textboxDescription.Dispatcher.Invoke( () => {
-
-                    previewImage = LoadImage( @"pack://application:,,/Resources/SorrySmall.png" );
-                    ImagePreview.Dispatcher.Invoke( () => { ImagePreview.Source = previewImage; ImagePreview.Stretch = Stretch.None; } );
-
-                    var tb = new TextBlock();
-                    var b = new Bold();
-                    var it = new Italic();
-                    textboxDescription.Inlines.Clear();
-                    b.Inlines.Add( new Run( "Unknown Steam-ID" ) );
-                    it.Inlines.Add( b );
-                    textboxDescription.Inlines.Add( it );
-                    downloadActive = false;
-                } );
-            }
-        }
-
         private BitmapImage LoadImage( string url )
         {
             try
@@ -508,11 +452,16 @@ namespace Calimero
 
         private static BitmapImage LoadImage( byte[] imageData )
         {
+            return LoadImage( new System.IO.MemoryStream( imageData ) );
+        }
+
+        private static BitmapImage LoadImage( Stream stream )
+        {
             try
             {
                 var i = new BitmapImage();
                 i.BeginInit();
-                i.StreamSource = new System.IO.MemoryStream( imageData );
+                i.StreamSource = stream;
                 i.EndInit();
                 i.Freeze();
                 return i;
@@ -523,6 +472,76 @@ namespace Calimero
             }
         }
 
+        private void UploadCurrentDefinition()
+        {
+            UploadDefinition( RicoManager.CurrentDocument );
+        }
+
+        private void UploadDefinition( PloppableRICODefinition ricoDef )
+        {
+            var client = new WebClient();
+            var ricoXml = "";
+
+            try
+            {
+                var ms = new MemoryStream();
+                ricoDef.Buildings[0].story = "666";
+                var xmlSerializer = new XmlSerializer(typeof(PloppableRICODefinition));
+                xmlSerializer.Serialize( ms, ricoDef );
+                ms.Seek( 0, SeekOrigin.Begin );
+                ricoXml = new StreamReader( ms ).ReadToEnd();
+            }
+            catch
+            { }
+
+            var url = String.Format("{0}", Settings.remote_host );
+            var args = new NameValueCollection() {
+                { "rico-definition", ricoXml },
+                { "client-id", Settings.client_id }
+            };
+
+            try
+            {
+                byte[] response = client.UploadValues( url, "POST", args );
+                string result = System.Text.Encoding.UTF8.GetString(response);
+
+                if ( result == "1" )
+                    MessageBox.Show( "Upload successful.", "Calimero", MessageBoxButton.OK, MessageBoxImage.Information );
+                else
+                    throw ( new Exception( "Database-Error" ) );
+            }
+            catch ( Exception e )
+            {
+                MessageBox.Show("Upload failed.\r\n" + e.Message, "Calimero - Error", MessageBoxButton.OK, MessageBoxImage.Error );
+            }
+        }
+
+        private RICOBuilding DownloadDefinitions()
+        {
+            
+            return DownloadDefinitions( RicoManager.CurrentBuilding.steamId );
+        }
+
+        private RICOBuilding DownloadDefinitions( string steamID )
+        {
+            var wc = new WebClient();
+            try
+            {
+                var response = wc.DownloadData( "http://ricodb.chickenkiller.com/" + steamID );
+                var ricoXml = System.Text.Encoding.UTF8.GetString( response );
+                var ricoData = RICOReader.ParseRICODefinition(steamID, new MemoryStream(response));
+                var dlg = new DownloadDefinitionDialog();
+                var res = dlg.ShowDialog(this, ricoData.Buildings);
+                if ( res.HasValue && res.Value )
+                    return dlg.selectedBuilding;
+                else
+                    return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 
     public class FormatIntConverter : IValueConverter
@@ -541,6 +560,30 @@ namespace Calimero
                     new System.Text.RegularExpressions
                     .Regex( @"[^\d]+" )
                     .Replace( value.ToString(), "" ) );
+        }
+    }
+
+    public class NotNullOrEmptyConverter : IValueConverter
+    {
+        public object Convert( object value, Type targetType, object parameter, System.Globalization.CultureInfo culture )
+        {
+            if ( value == null )
+                return false;
+
+            try
+            {
+                var v = (string)value;
+                return v != "";
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
+        public object ConvertBack( object value, Type targetType, object parameter, System.Globalization.CultureInfo culture )
+        {
+            return "";
         }
     }
 
