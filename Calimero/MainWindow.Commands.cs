@@ -204,7 +204,7 @@ namespace Calimero
         {
             var dlg = new OpenFileDialog();
             dlg.FileName = "";
-            dlg.Filter = "rico files (*.rico;PloppableRICODefinition.xml)|*.rico;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
+            dlg.Filter = "rico files|LocalRICOSettings.xml;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
             dlg.Multiselect = true;
             if ( dlg.ShowDialog() == true )
                 foreach ( var fileName in dlg.FileNames )
@@ -219,7 +219,7 @@ namespace Calimero
             var dlg = new OpenFileDialog();
 
             dlg.FileName = "";
-            dlg.Filter = "rico files (*.rico;PloppableRICODefinition.xml)|*.rico;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
+            dlg.Filter = "rico files|LocalRICOSettings.xml;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
 
             if ( dlg.ShowDialog() == true )
                 RicoManager.LoadDocument( dlg.FileName );
@@ -255,7 +255,7 @@ namespace Calimero
             {
                 var dlg = new SaveFileDialog();
                 dlg.FileName = "RICODefinition.xml";
-                dlg.Filter = "rico files (*.rico;RICODefinition.xml)|*.rico;RICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
+                dlg.Filter = "rico files|LocalRICOSettings.xml;PloppableRICODefinition.xml|asset files (*.crp)|*.crp"; // "Rico files (*.rico)|Asset files (*.crp)";
                 if ( dlg.ShowDialog() == true )
                     ricoFile = new FileInfo( dlg.FileName );
                 else
